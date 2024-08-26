@@ -6,6 +6,11 @@ const PORT = process.env.PORT || 3000
 // qui andiamo dentro un file "env" dove ci aspettiamo di trovare una variabile chiamata "PORT" con un valore,
 // questo valore lo prendiamo me lo salviamo dentro una variabile "PORT" qui, e se il file env è vuoto, passiamo 3000 come valore al port
 
+const mockUsers = [
+    {id: 1, username:'andy', displayname:'Andy'},
+    {id: 2, username:'alan', displayname:'Alan'},
+    {id: 2, username:'debora', displayname:'Debora'}
+]
 
 //ROTTA dove faccio una chiamata di tipo get "request" contiene i miei dati mentre "response" mi da la possibilità di pushare dei dati
 app.get("/", (request,response) =>{
@@ -16,11 +21,19 @@ app.get("/", (request,response) =>{
 
 //ALTRA ROTTA che creo dove se vai su "localhost:3000/api/users" vedrai un array degli oggetti che ho messo sotto
 app.get('/api/users', (request, response)=>{
-    response.send([
-        {id: 1, username:'andy', displayname:'Andy'},
-        {id: 2, username:'alan', displayname:'Alan'},
-        {id: 2, username:'debora', displayname:'Debora'}
-    ])
+    response.send(mockUsers)
+})
+
+//creo una rotta in cui uso i parametri, in particola l'id
+app.get('/api/users/:id', (request,response) => {
+  //console.log(request.params) //  se scrivo "localholst:3000//api/users/:1" nel link e carico la pagina dove c'e il mio link mi compare "{ id: '1' }" nel terminale 
+  const parsedId = parseInt(request.params.id)
+  console.log(parsedId)// se scrivo "localholst:3000//api/users/:1" nel link e carico la pagina dove c'e il mio link mi compare "1" nel terminale
+
+  if(isNaN(parsedId)) return response.status(400).send({ msg: 'Bad request. Invalid ID'}) // se nell'id metto qualcosa che non sia un numero
+
+  const findUser = mockUsers.find((user)=> user.id === parsedId)
+  if(!findUser) return response.sendStatus(404).send({ msg: 'Bad request. Invalid ID'}) 
 })
 
 app.listen(PORT, () =>{
