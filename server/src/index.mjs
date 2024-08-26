@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000
 const mockUsers = [
     {id: 1, username:'andy', displayname:'Andy'},
     {id: 2, username:'alan', displayname:'Alan'},
-    {id: 2, username:'debora', displayname:'Debora'}
+    {id: 3, username:'debora', displayname:'Debora'}
 ]
 
 //ROTTA dove faccio una chiamata di tipo get "request" contiene i miei dati mentre "response" mi da la possibilità di pushare dei dati
@@ -32,8 +32,11 @@ app.get('/api/users/:id', (request,response) => {
 
   if(isNaN(parsedId)) return response.status(400).send({ msg: 'Bad request. Invalid ID'}) // se nell'id metto qualcosa che non sia un numero
 
+  //il pezzo sotto mi returna lo user che corrisponde all'id selezionato se cerco o sul browser o su postman
   const findUser = mockUsers.find((user)=> user.id === parsedId)
-  if(!findUser) return response.sendStatus(404).send({ msg: 'Bad request. Invalid ID'}) 
+  if(!findUser) return response.sendStatus(404)
+    return response.send(findUser)
+
 })
 
 app.listen(PORT, () =>{
