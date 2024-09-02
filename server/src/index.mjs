@@ -2,6 +2,8 @@ import express from 'express'
 
 const app = express(); //creato l'app express
 
+app.use(express.json()) //prima impostazione del middleware
+
 const PORT = process.env.PORT || 3000 
 // qui andiamo dentro un file "env" dove ci aspettiamo di trovare una variabile chiamata "PORT" con un valore,
 // questo valore lo prendiamo me lo salviamo dentro una variabile "PORT" qui, e se il file env è vuoto, passiamo 3000 come valore al port
@@ -22,8 +24,27 @@ app.get("/", (request,response) =>{
 
 //ALTRA ROTTA che creo dove se vai su "localhost:3000/api/users" vedrai un array degli oggetti che ho messo sotto
 app.get('/api/users', (request, response)=>{
+    console.log(request.query)
+    const{query: {filter,value }} = request
+
+  if(!filter && !value) return response.send(mockUsers)
+
+    if(filter && value) return response.send(mockUsers.filter((user)=>user[filter].includes(value)))
+
     response.send(mockUsers)
 })
+
+
+//CRUD (POST REQUEST)
+app.post('/api/users', (request, response)=>{
+    console.log(request.body)
+    //we add a new user to our array of user. NOTE we dont have a REAL database yet so this is a quick method
+    const{body} = request
+    const newUser = {id: mockUsers[mockUsers.length -1].id + 1, ...body }
+    mockUsers.push(newUser)
+    response.status(201).send(newUser) 
+})
+
 
 //creo una rotta in cui uso i parametri, in particola l'id
 app.get('/api/users/:id', (request,response) => {
@@ -39,6 +60,22 @@ app.get('/api/users/:id', (request,response) => {
     return response.send(findUser)
 
 })
+
+//CRUD (PUT REQUEST)
+app.put('/api/users/:id', (request, response)=>{
+   
+    const{body, params:{id},} = request
+    const parsedId = parseInt(id)
+    if(isNaN(parsedId)) return response.sendStatus(400) //se l'id non è un numero diamo errore 400
+
+    const findUserIndex = mockUsers.findIndex( (user) => user.id === parsedId)
+
+    if(findUserIndex === -1) return response.sendStatus(400) 
+
+    mockUsers[findUserIndex] = {id:parsedId, ...body}
+    return response.sendStatus(200)
+})
+
 
 app.listen(PORT, () =>{
     console.log(`running on port ${PORT}`)
